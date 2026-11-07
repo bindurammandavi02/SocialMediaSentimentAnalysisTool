@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Sentiment Analysis</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="brand">
+            <img src="{{ url_for('static', filename='logo.png') }}"
+                 alt="Project Logo">
+            <h1>Sentiment Analyzer</h1>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="#analyzer">Analyze</a>
+            <a href="#dashboard">Dashboard</a>
+            <a href="#about">About</a>
+        </div>
+    </nav>
+
+    <!-- Welcome Section -->
+    <header class="hero">
+        <h2>Social Media Sentiment Analysis</h2>
+        <p>Analyze comments using Artificial Intelligence,
+           Machine Learning and NLP.</p>
+    </header>
+
+    <!-- Analyzer -->
+    <section class="analyzer-section" id="analyzer">
+        <div class="analyzer-card">
+            <h2>Analyze Your Text</h2>
+            <p>Enter a social media comment below</p>
+
+            <form action="/analyze" method="POST">
+                <textarea name="text"
+                    placeholder="Example: I really love this product!"
+                    required></textarea>
+
+                <button type="submit">Analyze Sentiment</button>
+            </form>
+
+            {% if sentiment %}
+            <div class="result-card">
+                <h3>Your Sentiment Result</h3>
+                <div class="result-emoji">{{ emoji }}</div>
+                <h2>{{ sentiment }}</h2>
+                <p>Confidence: {{ confidence }}%</p>
+
+                <div class="progress">
+                    <div class="progress-bar"
+                         style="width: {{ confidence }}%">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section class="dashboard" id="dashboard">
+        <h2>Sentiment Dashboard</h2>
+        <p class="section-subtitle">
+            Overall sentiment analysis statistics
+        </p>
+
+        <div class="stats-container">
+
+            <div class="stat-card total">
+                <h3>Total Analysis</h3>
+                <div class="stat-emoji">📊</div>
+                <h2>{{ total|default(0) }}</h2>
+            </div>
+
+            <div class="stat-card positive">
+                <h3>Positive</h3>
+                <div class="stat-emoji">😊</div>
+                <h2>{{ counts.get('Positive', 0) }}</h2>
+                <p>{{ percentages.get('Positive', 0) }}%</p>
+            </div>
+
+            <div class="stat-card negative">
+                <h3>Negative</h3>
+                <div class="stat-emoji">😞</div>
+                <h2>{{ counts.get('Negative', 0) }}</h2>
+                <p>{{ percentages.get('Negative', 0) }}%</p>
+            </div>
+
+            <div class="stat-card neutral">
+                <h3>Neutral</h3>
+                <div class="stat-emoji">😐</div>
+                <h2>{{ counts.get('Neutral', 0) }}</h2>
+                <p>{{ percentages.get('Neutral', 0) }}%</p>
+            </div>
+
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-container">
+
+            <div class="chart-card">
+                <h3>Sentiment Distribution</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Sentiment Comparison</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- About -->
+    <section class="about" id="about">
+        <h2>About Our Project</h2>
+        <p>
+            This project uses Machine Learning, Artificial Intelligence
+            and Natural Language Processing to understand social media
+            comments and classify them as Positive, Negative or Neutral.
+        </p>
+    </section>
+
+    <footer>
+        © 2026 Social Media Sentiment Analysis Project
+    </footer>
+
+    <!-- Chart.js -->
+    <script>
+        const positive = {{ counts.get('Positive', 0) }};
+        const negative = {{ counts.get('Negative', 0) }};
+        const neutral = {{ counts.get('Neutral', 0) }};
+
+        const chartLabels = ['Positive', 'Negative', 'Neutral'];
+        const chartData = [positive, negative, neutral];
+
+        new Chart(document.getElementById('pieChart'), {
+            type: 'pie',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    data: chartData,
+                    backgroundColor: ['#22c55e', '#ef4444', '#f59e0b']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Number of Comments',
+                    data: chartData,
+                    backgroundColor: ['#22c55e', '#ef4444', '#f59e0b']
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
